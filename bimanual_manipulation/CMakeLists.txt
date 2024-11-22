@@ -20,11 +20,21 @@ find_package(catkin REQUIRED
     tf2_geometry_msgs
     actionlib_msgs
     control_msgs
-    ar_track_alvar
+    #ar_track_alvar
+    message_generation
+    tf_conversions
+    tf
+    eigen_conversions
 )
 
 find_package(Eigen3 REQUIRED)
 find_package(Boost REQUIRED system filesystem date_time thread)
+
+## Generate messages in the 'msg' folder
+add_message_files(FILES Grasp.msg Grasps.msg)
+
+## Generate services in the 'srv' folder
+add_service_files(FILES SolveIK.srv)
 
 generate_messages(
   DEPENDENCIES actionlib_msgs std_msgs trajectory_msgs control_msgs geometry_msgs # Or other packages containing msgs
@@ -41,7 +51,7 @@ catkin_package(
     tf2_geometry_msgs
     actionlib_msgs
     control_msgs
-    # message_runtime
+    message_runtime
   DEPENDS
     EIGEN3
 )
@@ -51,14 +61,20 @@ include_directories(SYSTEM ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIR} ${EIGEN3_
 add_executable(command_robot src/command_robot_example.cpp)
 target_link_libraries(command_robot ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
-add_executable(pick_place src/pick_place.cpp)
-target_link_libraries(pick_place ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+#add_executable(pick_place src/pick_place.cpp)
+#target_link_libraries(pick_place ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
+add_executable(pick_place_perception src/pick_place_perception.cpp)
+target_link_libraries(pick_place_perception ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 add_executable(alpha_puzzle src/alpha_puzzle.cpp)
 target_link_libraries(alpha_puzzle ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
-add_executable(camera_pose_estimate src/camera_pose_estimate.cpp)
-target_link_libraries(camera_pose_estimate ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+#add_executable(camera_pose_estimate src/camera_pose_estimate.cpp)
+#target_link_libraries(camera_pose_estimate ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
+add_executable(camera_calibration_random src/camera_calibration_random.cpp)
+target_link_libraries(camera_calibration_random ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 #install(TARGETS alpha_puzzle DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 #install(TARGETS pick_place DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})

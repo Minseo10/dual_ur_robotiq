@@ -35,22 +35,24 @@ shape_msgs::SolidPrimitive setPrim(int d, float x, float y, float z);
 geometry_msgs::Pose setGeomPose(float x, float y, float z, float ox, float oy, float oz, float ow);
 
 // TODO: calculate camera-robot transformation matrix
+geometry_msgs::Pose A;
+
 void arMarkersCallback(ar_track_alvar_msgs::AlvarMarkers req)
 {
     if (!req.markers.empty()) {
-//      tf::Quaternion q(req.markers[0].pose.pose.position.x, req.markers[0].pose.pose.position.y, req.markers[0].pose.pose.position.z);
-      tf::Quaternion q(req.markers[1].pose.pose.orientation.x, req.markers[1].pose.pose.orientation.y, req.markers[1].pose.pose.orientation.z, req.markers[1].pose.pose.orientation.w);
-      tf::Matrix3x3 m(q);
-      double roll, pitch, yaw;
-      m.getRPY(roll, pitch, yaw);
-      ROS_INFO("roll, pitch, yaw=%1.2f  %1.2f  %1.2f", roll, pitch, yaw);
-
+//        A_q = tf::Quaternion q(req.markers[0].pose.pose.orientation.x, req.markers[0].pose.pose.orientation.y, req.markers[0].pose.pose.orientation.z, req.markers[0].pose.pose.orientation.w);
+//        A_p = Vector3(req.markers[0].pose.pose.position.x, req.markers[0].pose.pose.position.y, req.markers[0].pose.pose.position.z);
+//      tf::Quaternion q(req.markers[0].pose.pose.orientation.x, req.markers[0].pose.pose.orientation.y, req.markers[0].pose.pose.orientation.z, req.markers[0].pose.pose.orientation.w);
+//      tf::Matrix3x3 m(q);
+//      double roll, pitch, yaw;
+//      m.getRPY(roll, pitch, yaw);
+//      ROS_INFO("roll, pitch, yaw=%1.2f  %1.2f  %1.2f", roll, pitch, yaw);
       // roll  --> rotate around vertical axis
       // pitch --> rotate around horizontal axis
       // yaw   --> rotate around depth axis
-    } // if
+       A = req.markers[0].pose.pose;
+    }
 }
-
 int main(int argc, char** argv)
 {
   std::ofstream file;
@@ -81,7 +83,7 @@ int main(int argc, char** argv)
   visual_tools.deleteAllMarkers();
   visual_tools.loadRemoteControl();
 
-//  ros::Subscriber sub_marker = n.subscribe("/ar_pose_marker", 100, arMarkersCallback);
+  ros::Subscriber sub_marker = n.subscribe("/ar_pose_marker", 100, arMarkersCallback);
 
   // RViz provides many types of markers, in this demo we will use text, cylinders, and spheres
   Eigen::Isometry3d text_pose = Eigen::Isometry3d::Identity();
@@ -274,19 +276,25 @@ int main(int argc, char** argv)
   visual_tools.prompt("2-2. Press 'next' once the plan is complete. Move the block to P1");
   rightArm.move();
 
+  visual_tools.prompt("Press 'next' to save transformation matrix at pose 2");
+  //TODO: subscribe marker pose at P1
+  tf::Transform A1;
+  A1.setOrigin(tf::Vector3(A.position.x, A.position.y, A.position.z));
+  A1.setRotation(tf::Quaternion(A.orientation.x, A.orientation.y, A.orientation.z, A.orientation.w));
 
-  //TODO: subscribe marker pose
-
+  tf::Transform B1;
+  B1.setOrigin(tf::Vector3(right_goal_pose.position.x, right_goal_pose.position.y, right_goal_pose.position.z));
+  B1.setRotation(tf::Quaternion(right_goal_pose.orientation.x, right_goal_pose.orientation.y, right_goal_pose.orientation.z, right_goal_pose.orientation.w));
 
   // 3. move the right marker block (P2)
-  right_goal_pose.position.x = -0.38;
+  right_goal_pose.position.x = -0.5;
   right_goal_pose.position.y = 0.2;
-  right_goal_pose.position.z = 1.86;
+  right_goal_pose.position.z = 1.65;
 
-  right_goal_pose.orientation.x = 0.5926;
-  right_goal_pose.orientation.y = -0.3856;
-  right_goal_pose.orientation.z = -0.3856;
-  right_goal_pose.orientation.w = 0.5926;
+  right_goal_pose.orientation.x = 0.5;
+  right_goal_pose.orientation.y = -0.5;
+  right_goal_pose.orientation.z = -0.5;
+  right_goal_pose.orientation.w = 0.5;
 
   rightArm.setApproximateJointValueTarget(right_goal_pose, "right_gripper_tool0");
   success = (rightArm.plan(my_plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
@@ -304,10 +312,18 @@ int main(int argc, char** argv)
   visual_tools.prompt("3. Press 'next' once the plan is complete. Move the block to P2");
   rightArm.move();
 
-  //TODO: subscribe marker pose
+  visual_tools.prompt("Press 'next' to save transformation matrix at pose 2");
+  //TODO: subscribe marker pose at P2
+  tf::Transform A2;
+  A2.setOrigin(tf::Vector3(A.position.x, A.position.y, A.position.z));
+  A2.setRotation(tf::Quaternion(A.orientation.x, A.orientation.y, A.orientation.z, A.orientation.w));
 
+  tf::Transform B2;
+  B2.setOrigin(tf::Vector3(right_goal_pose.position.x, right_goal_pose.position.y, right_goal_pose.position.z));
+  B2.setRotation(tf::Quaternion(right_goal_pose.orientation.x, right_goal_pose.orientation.y, right_goal_pose.orientation.z, right_goal_pose.orientation.w));
 
   // FINAL. move to initial pose
+  right_goal_pose = right_block_pose;
   rightArm.setStartStateToCurrentState();
   rightArm.setJointValueTarget("right_shoulder_pan_joint", -0.26179); //-15
   rightArm.setJointValueTarget("right_shoulder_lift_joint", -1.3962634); //-80
@@ -316,25 +332,154 @@ int main(int argc, char** argv)
   rightArm.setJointValueTarget("right_wrist_2_joint", 2.35619); //135
   rightArm.setJointValueTarget("right_wrist_3_joint", -0.523599);  //-30
   success = (rightArm.plan(my_plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
-  ROS_INFO_NAMED("tutorial", "Visualizing initialization %s", success ? "" : "FAILED");
 
+  ROS_INFO_NAMED("tutorial", "Visualizing initialization %s", success ? "" : "FAILED");
+  visual_tools.publishText(text_pose, "move test", rvt::WHITE, rvt::XLARGE);
+  visual_tools.trigger();
+  visual_tools.prompt("Press 'next' to test the right arm move");
+  rightArm.execute(my_plan);
+  // FINAL-1. Move to the right block pose
+  right_goal_pose.position.z += 0.1;
+  rightArm.setApproximateJointValueTarget(right_goal_pose, "right_gripper_tool0");
+  success = (rightArm.plan(my_plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
+  ROS_INFO_NAMED("tutorial", "Visualizing plan 1 (pose goal) %s", success ? "" : "FAILED");
+  visual_tools.trigger();
+  visual_tools.prompt("4-1. Press 'next' once the plan is complete. Right arm moving to the right block's initial pose");
+  rightArm.move();
+
+  // FINAL-2. Move down to right block pose
+  right_goal_pose.position.z -= 0.038;
+  rightArm.setApproximateJointValueTarget(right_goal_pose, "right_gripper_tool0");
+  success = (rightArm.plan(my_plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
+  visual_tools.trigger();
+  visual_tools.prompt("4-2. Press 'next' once the plan is complete. Right arm moving down");
+  rightArm.execute(my_plan);
+
+  // Final-3. Open the gripper
+  visual_tools.trigger();
+  visual_tools.prompt("4-3. Press 'next' to open the right gripper");
+  gripper_msg_r.data = 'o';
+  gripper_pub_right.publish(gripper_msg_r);
+
+  // Final-4. Move to initial pose
+  rightArm.setStartStateToCurrentState();
+  rightArm.setJointValueTarget("right_shoulder_pan_joint", -0.26179); //-15
+  rightArm.setJointValueTarget("right_shoulder_lift_joint", -1.3962634); //-80
+  rightArm.setJointValueTarget("right_elbow_joint", 1.91986); //110
+  rightArm.setJointValueTarget("right_wrist_1_joint", -1.3962634); //-80
+  rightArm.setJointValueTarget("right_wrist_2_joint", 2.35619); //135
+  rightArm.setJointValueTarget("right_wrist_3_joint", -0.523599);  //-30
+  success = (rightArm.plan(my_plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
+
+  ROS_INFO_NAMED("tutorial", "Visualizing initialization %s", success ? "" : "FAILED");
   visual_tools.publishText(text_pose, "move test", rvt::WHITE, rvt::XLARGE);
   visual_tools.trigger();
   visual_tools.prompt("Press 'next' to test the right arm move");
   rightArm.execute(my_plan);
 
-  visual_tools.trigger();
-  visual_tools.prompt("Press 'next' to open the right gripper");
-  gripper_msg_r.data = 'o';
-  gripper_pub_right.publish(gripper_msg_r);
-
 
   //TODO: calculate camera to robot base transformation
+  tf::Transform A_diff = A2.inverse()*A1;
+  tf::Transform B_diff = B2.inverse()*B1;
+
   //TODO: save the transformation to txt file
+  file << "A1(position) :" << std::endl;
+  file <<"x: " << A1.getOrigin()[0] << std::endl;
+  file <<"y: " << A1.getOrigin()[1] << std::endl;
+  file <<"z: " << A1.getOrigin()[2] << std::endl;
+  file << "A1(rotation matrix) :" << std::endl;
+  for(int i=0; i<3; i++){
+    for(int j=0; j<3; j++){
+      file << A1.getBasis()[i][j]<<" ";
+    }
+    file << "\n";
+  }
+  file << "A1(orientation) :" << std::endl;
+  file <<"x: " << A1.getRotation()[0] << std::endl;
+  file <<"y: " << A1.getRotation()[1] << std::endl;
+  file <<"z: " << A1.getRotation()[2] << std::endl;
+  file <<"w: " << A1.getRotation()[3] << "\n" <<std::endl;
+  file << "A2(position) :" << std::endl;
+  file <<"x: " << A2.getOrigin()[0] << std::endl;
+  file <<"y: " << A2.getOrigin()[1] << std::endl;
+  file <<"z: " << A2.getOrigin()[2] << std::endl;
+  file << "A2(rotation matrix) :" << std::endl;
+  for(int i=0; i<3; i++){
+    for(int j=0; j<3; j++){
+      file << A2.getBasis()[i][j]<<" ";
+    }
+    file << "\n";
+  }
+  file << "A2(orientation) :" << std::endl;
+  file <<"x: " << A2.getRotation()[0] << std::endl;
+  file <<"y: " << A2.getRotation()[1] << std::endl;
+  file <<"z: " << A2.getRotation()[2] << std::endl;
+  file <<"w: " << A2.getRotation()[3] << "\n" <<std::endl;
+  file << "B1(position) :" << std::endl;
+  file <<"x: " << B1.getOrigin()[0] << std::endl;
+  file <<"y: " << B1.getOrigin()[1] << std::endl;
+  file <<"z: " << B1.getOrigin()[2] << std::endl;
+  file << "B1(rotation matrix) :" << std::endl;
+  for(int i=0; i<3; i++){
+    for(int j=0; j<3; j++){
+      file << B1.getBasis()[i][j]<<" ";
+    }
+    file << "\n";
+  }
+  file << "B1(orientation) :" << std::endl;
+  file <<"x: " << B1.getRotation()[0] << std::endl;
+  file <<"y: " << B1.getRotation()[1] << std::endl;
+  file <<"z: " << B1.getRotation()[2] << std::endl;
+  file <<"w: " << B1.getRotation()[3] << "\n" <<std::endl;
+  file << "B2(position) :" << std::endl;
+  file <<"x: " << B2.getOrigin()[0] << std::endl;
+  file <<"y: " << B2.getOrigin()[1] << std::endl;
+  file <<"z: " << B2.getOrigin()[2] << std::endl;
+  file << "B2(rotation matrix) :" << std::endl;
+  for(int i=0; i<3; i++){
+    for(int j=0; j<3; j++){
+      file << B2.getBasis()[i][j]<<" ";
+    }
+    file << "\n";
+  }
+  file << "B2(orientation) :" << std::endl;
+  file <<"x: " << B2.getRotation()[0] << std::endl;
+  file <<"y: " << B2.getRotation()[1] << std::endl;
+  file <<"z: " << B2.getRotation()[2] << std::endl;
+  file <<"w: " << B2.getRotation()[3] << "\n" <<std::endl;
+  file << "A(position) :" << std::endl;
+  file <<"x: " << A_diff.getOrigin()[0] << std::endl;
+  file <<"y: " << A_diff.getOrigin()[1] << std::endl;
+  file <<"z: " << A_diff.getOrigin()[2] << std::endl;
+  file << "A(rotation matrix) :" << std::endl;
+  for(int i=0; i<3; i++){
+    for(int j=0; j<3; j++){
+      file << A_diff.getBasis()[i][j]<<" ";
+    }
+    file << "\n";
+  }
+  file << "A(orientation) :" << std::endl;
+  file <<"x: " << A_diff.getRotation()[0] << std::endl;
+  file <<"y: " << A_diff.getRotation()[1] << std::endl;
+  file <<"z: " << A_diff.getRotation()[2] << std::endl;
+  file <<"w: " << A_diff.getRotation()[3] << "\n" <<std::endl;
 
-  file << "";
-  file.close();
-
+  file << "B(position) :" << std::endl;
+  file <<"x: " << B_diff.getOrigin()[0] << std::endl;
+  file <<"y: " << B_diff.getOrigin()[1] << std::endl;
+  file <<"z: " << B_diff.getOrigin()[2] << std::endl;
+  file << "B(rotation matrix) :" << std::endl;
+  for(int i=0; i<3; i++){
+    for(int j=0; j<3; j++){
+      file << B_diff.getBasis()[i][j]<<" ";
+    }
+    file << "\n";
+  }
+  file << "B(orientation) :" << std::endl;
+  file <<"x: " << B_diff.getRotation()[0] << std::endl;
+  file <<"y: " << B_diff.getRotation()[1] << std::endl;
+  file <<"z: " << B_diff.getRotation()[2] << std::endl;
+  file <<"w: " << B_diff.getRotation()[3] << "\n" <<std::endl;
   ros::shutdown();
   return 0;
 }

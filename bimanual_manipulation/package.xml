@@ -68,7 +68,10 @@
   <build_depend>tf2_geometry_msgs</build_depend>
   <build_depend>actionlib_msgs</build_depend>
   <build_depend>control_msgs</build_depend>
-
+  <build_depend>message_generation</build_depend>
+  <build_depend>eigen_conversions</build_depend>
+  <build_depend>tf</build_depend>
+  <build_depend>tf_conversions</build_depend>
 
   <exec_depend>pluginlib</exec_depend>
   <exec_depend>moveit_core</exec_depend>
@@ -95,7 +98,10 @@
   <exec_depend>actionlib_msgs</exec_depend>
   <exec_depend>control_msgs</exec_depend>
   <exec_depend>message_generation</exec_depend>
-
+  <exec_depend>message_runtime</exec_depend>
+  <exec_depend>eigen_conversions</exec_depend>
+  <exec_depend>tf</exec_depend>
+  <exec_depend>tf_conversions</exec_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

@@ -88,10 +88,6 @@ int main(int argc, char** argv)
   success = (rightArm.plan(my_plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
   ROS_INFO_NAMED("tutorial", "Visualizing plan 1 (pose goal) %s", success ? "" : "FAILED");
 
-  visual_tools.publishText(text_pose, "move test", rvt::WHITE, rvt::XLARGE);
-  visual_tools.trigger();
-  visual_tools.prompt("Press 'next' to test the right arm move");
-  rightArm.move();
 
 
   start_pose_left.position.z += 0.01;
