@@ -56,13 +56,16 @@
   <joint name="left_arm_joint" type="fixed">
     <parent link="stand" />
     <child link = "left_base_link" />
-    <origin xyz="0 0.35 1.8" rpy="${PI/4*3} 0 ${PI}" />
+    <!--origin xyz="0 -0.3 1.803" rpy="${(PI/4*3)+0.003} -0.005 0" /-->
+    <origin xyz="-0.01 -0.305 1.65" rpy="${PI/4*3} 0 0" />
+    <!-- origin xyz="0 -0.3 1.65" rpy="${PI/4*3} 0 0" /-->
   </joint>
 
   <joint name="right_arm_joint" type="fixed">
     <parent link="stand" />
     <child link = "right_base_link" />
-    <origin xyz="0 -0.35 1.8" rpy="${PI/4*3} 0 0" />
+    <!--origin xyz="0 0.3 1.8" rpy="${PI/4*3} 0.028 ${PI}" /-->
+    <origin xyz="0 0.305 1.65" rpy="${PI/4*3} 0 ${PI}" />
   </joint>
 
 <!-- (2) Robotiq 3-finger gripper (Right Hand)-->

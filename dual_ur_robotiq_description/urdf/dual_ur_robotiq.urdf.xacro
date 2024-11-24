@@ -10,22 +10,22 @@
   <link name="stand">
     <inertial>
         <mass value="1000" />
-        <origin xyz="0 0 1.8" rpy="0 0 ${PI/2}" />
+        <origin xyz="0 0 1.66" rpy="0 0 ${PI/2}" />
         <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
     </inertial>
     <visual>
-      <origin xyz="0 0 1.8" rpy="0 0 ${PI/2}"/>
+      <origin xyz="0 0 1.66" rpy="0 0 ${PI/2}"/>
       <geometry>
-        <mesh filename="package://dual_ur_robotiq_description/meshes/dual_arm_mount.stl" scale="0.03 0.03 0.03" />
+        <mesh filename="package://dual_ur_robotiq_description/meshes/dual_arm_mount.stl" scale="0.025 0.025 0.025" />
       </geometry>
       <material name="DarkGrey">
         <color rgba="0.3 0.3 0.3 1.0"/>
       </material>
     </visual>
     <collision>
-      <origin xyz="0 0 1.8" rpy="0 0 ${PI/2}"/>
+      <origin xyz="0 0 1.66" rpy="0 0 ${PI/2}"/>
       <geometry>
-        <mesh filename="package://dual_ur_robotiq_description/meshes/dual_arm_mount.stl" scale="0.03 0.03 0.03" />
+        <mesh filename="package://dual_ur_robotiq_description/meshes/dual_arm_mount.stl" scale="0.025 0.025 0.025" />
       </geometry>
     </collision>
   </link>
@@ -56,13 +56,16 @@
   <joint name="left_arm_joint" type="fixed">
     <parent link="stand" />
     <child link = "left_base_link" />
-    <origin xyz="0 0.35 1.8" rpy="${PI/4*3} 0 ${PI}" />
+    <!--origin xyz="0 -0.3 1.803" rpy="${(PI/4*3)+0.003} -0.005 0" /-->
+    <origin xyz="-0.01 -0.305 1.65" rpy="${PI/4*3} 0 0" />
+    <!-- origin xyz="0 -0.3 1.65" rpy="${PI/4*3} 0 0" /-->
   </joint>
 
   <joint name="right_arm_joint" type="fixed">
     <parent link="stand" />
     <child link = "right_base_link" />
-    <origin xyz="0 -0.35 1.8" rpy="${PI/4*3} 0 0" />
+    <!--origin xyz="0 0.3 1.8" rpy="${PI/4*3} 0.028 ${PI}" /-->
+    <origin xyz="0 0.305 1.65" rpy="${PI/4*3} 0 ${PI}" />
   </joint>
 
 <!-- (2) Robotiq 3-finger gripper (Right Hand)-->
