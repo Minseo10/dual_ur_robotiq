@@ -55,6 +55,9 @@ target_link_libraries(pick_place_collision ${catkin_LIBRARIES} ${Boost_LIBRARIES
 add_executable(bimanual_manipulation_demo src/bimanual_manipulation_demo.cpp)
 target_link_libraries(bimanual_manipulation_demo ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
+add_executable(gripper_test src/gripper_test.cpp)
+target_link_libraries(gripper_test ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
 #install(TARGETS pick_and_place DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 #install(TARGETS pick_and_place_collision DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 #install(TARGETS pick_and_place_collision_depth_camera DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})

@@ -40,7 +40,7 @@ int main(int argc, char** argv)
 
   arms_group_interface.setMaxVelocityScalingFactor(1.0);
   arms_group_interface.setMaxAccelerationScalingFactor(1.0);
-  arms_group_interface.setPlanningTime(15.0);
+  arms_group_interface.setPlanningTime(20);
   arms_group_interface.setNumPlanningAttempts(20.0);
 
   moveit::core::RobotModelConstPtr kinematic_model = right_group_interface.getRobotModel();
@@ -54,8 +54,8 @@ int main(int argc, char** argv)
   std::vector<double> left_joint_values;
 
   // init pose
-  std::vector<double> init_r = {158*D2R, -119*D2R, -100*D2R, -31*D2R, 50*D2R, -73*D2R};
-  std::vector<double> init_l = {-162*D2R, -65*D2R, 99*D2R, -139*D2R, -48*D2R, -25*D2R};
+  std::vector<double> init_r = {161*D2R, -50*D2R, 89*D2R, -145*D2R, 50*D2R, -22*D2R};
+  std::vector<double> init_l = {-161*D2R, -130*D2R, -89*D2R, -35*D2R, -50*D2R, -68*D2R};
   std::map<std::string, double> variable_values_right = vector_to_map(right_joint_names, init_r);
   std::map<std::string, double> variable_values_left = vector_to_map(left_joint_names, init_l);
   arms_group_interface.setJointValueTarget(variable_values_right);
